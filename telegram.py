@@ -2,10 +2,14 @@
 #pushbyllet.py ile beraber kullanılmasına gerek yoktur. 
 import serial
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # .env dosyasındaki değişkenleri yükle
 
 # Ayarlar
-TOKEN = "SENIN_BOT_TOKENIN"
-CHAT_ID = "SENIN_CHAT_ID_NUMARAN"
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Telegram bot token'ı
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # Telegram chat ID
 
 arduino_port = "COM7" # Arduino'nun bağlı olduğu port
 baudrate = 9600  #Baudrate değeri

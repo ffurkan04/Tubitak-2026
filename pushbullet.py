@@ -3,13 +3,17 @@
 import serial
 import time
 from pushbullet import Pushbullet
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # .env dosyasındaki değişkenleri yükle
 
 port = 'COM7'  #Kullanılan port 
 baudrate = 9600  #Baudrate değeri
 
 # Ayarlar
-pb = Pushbullet("SENIN_API_ANAHTARIN")
-arduino = serial.Serpytial(port, baudrate) 
+pb = Pushbullet(os.getenv("PUSHBULLET_API"))
+arduino = serial.Serial(port, baudrate)
 
 print("Sistem aktif, hareket bekleniyor...")
 
