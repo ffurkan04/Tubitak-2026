@@ -1,33 +1,44 @@
-#Mesajın telegram üzerinden gönderilmesi için gerekli olan dosya
-#pushbyllet.py ile beraber kullanılmasına gerek yoktur. 
 import serial
 import requests
 import os
+import time # Hatalarda beklemek için ekledik
 from dotenv import load_dotenv
 
-load_dotenv()  # .env dosyasındaki değişkenleri yükle
+load_dotenv()
 
-# Ayarlar
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Telegram bot token'ı
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")  # Telegram chat ID
-
-arduino_port = "COM7" # Arduino'nun bağlı olduğu port
-baudrate = 9600  #Baudrate değeri
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+arduino_port = "COM7" 
+baudrate = 9600
 
 def telegram_mesaj_gonder(mesaj):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={CHAT_ID}&text={mesaj}"
-    requests.get(url)
+    try:
+        requests.get(url)
+    except Exception as e:
+        print(f"Telegram mesajı gönderilemedi: {e}")
 
-# Arduino ile bağlantıyı başlat
+# --- Arduino Bağlantısını Başlatma ---
+ser = None # ser değişkenini başta boş olarak tanımlıyoruz
+
 try:
-    ser = serial.Serial(arduino_port, baudrate)
-    print("Sistem aktif, hareket bekleniyor...")
-except:
-    print("Arduino bulunamadi! Portu kontrol et.")
+    ser = serial.Serial(arduino_port, baudrate, timeout=1)
+    print(f"Sistem aktif: {arduino_port} üzerinden hareket bekleniyor...")
+except Exception as e:
+    print(f"HATA: Arduino bulunamadı! {arduino_port} portu meşgul olabilir veya yanlış olabilir.")
+    print(f"Detaylı Hata: {e}")
 
-while True:
-    if ser.in_waiting > 0:
-        veri = ser.readline().decode('utf-8').strip()
-        if veri == "HAREKET":
-            print("Hareket algilandi! Telegram'a gonderiliyor...")
-            telegram_mesaj_gonder("UYARI: Enkaz altında hareket algılandı!")
+# --- Ana Döngü ---
+if ser: # Sadece bağlantı varsa döngüye gir
+    while True:
+        try:
+            if ser.in_waiting > 0:
+                veri = ser.readline().decode('utf-8').strip()
+                if veri == "HAREKET":
+                    print("Hareket algilandi! Telegram'a gonderiliyor...")
+                    telegram_mesaj_gonder("UYARI: Enkaz altında hareket algılandı!")
+        except Exception as e:
+            print(f"Bağlantı koptu: {e}")
+            break
+else:
+    print("Program bağlantı sağlanamadığı için başlatılamadı. Lütfen portu kontrol edip tekrar çalıştırın.")
