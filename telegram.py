@@ -34,7 +34,7 @@ if ser: # Sadece bağlantı varsa döngüye gir
         try:
             if ser.in_waiting > 0:
                 veri = ser.readline().decode('utf-8').strip()
-                if veri == "HAREKET":
+                if veri == "DIKKAT: Enkaz altinda hareket algilandi!": #Arduino tarafından gönderilen mesaj. 
                     print("Hareket algilandi! Telegram'a gonderiliyor...")
                     telegram_mesaj_gonder("UYARI: Enkaz altında hareket algılandı!")
         except Exception as e:
