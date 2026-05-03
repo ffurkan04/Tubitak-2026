@@ -11,12 +11,28 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 arduino_port = "COM7" 
 baudrate = 9600
 
+# Mesaj atmak için aradaki ara
+message_time = 80 #60 saniye 
+last_message = 0 #son mesajın atıldığı zamanı tutar. 
+ 
 def telegram_mesaj_gonder(mesaj):
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={CHAT_ID}&text={mesaj}"
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    params = {
+        'chat_id': CHAT_ID,
+        'text': mesaj
+    }
     try:
-        requests.get(url)
+        print("Telegram'a istek gönderiliyor...") # Log ekledik
+        response = requests.get(url, params=params, timeout=10)
+        
+        if response.status_code == 200:
+            print("Mesaj başarıyla iletildi!")
+        else:
+            print(f"Mesaj gönderilemedi! Hata Kodu: {response.status_code}")
+            print(f"Sunucu Yanıtı: {response.text}")
+            
     except Exception as e:
-        print(f"Telegram mesajı gönderilemedi: {e}")
+        print(f"Bağlantı Hatası: {e}")
 
 # --- Arduino Bağlantısını Başlatma ---
 ser = None # ser değişkenini başta boş olarak tanımlıyoruz
@@ -35,8 +51,15 @@ if ser: # Sadece bağlantı varsa döngüye gir
             if ser.in_waiting > 0:
                 veri = ser.readline().decode('utf-8').strip()
                 if veri == "DIKKAT: Enkaz altinda hareket algilandi!": #Arduino tarafından gönderilen mesaj. 
-                    print("Hareket algilandi! Telegram'a gonderiliyor...")
-                    telegram_mesaj_gonder("UYARI: Enkaz altında hareket algılandı!")
+                    now = time.time() #şu anı alıyor.
+                    if now-last_message>message_time: 
+                        print("Hareket algilandi! Telegram'a gonderiliyor...")
+                        telegram_mesaj_gonder("UYARI: Enkaz altında hareket algılandı!")
+                        last_message = now
+                    else : 
+                        kalan_sure = int(message_time - (now-last_message))
+                        print(f"Hareket var ama spam koruması aktif. Beklenen süre: {kalan_sure} sn.")
+                    
         except Exception as e:
             print(f"Bağlantı koptu: {e}")
             break
