@@ -11,5 +11,5 @@ void loop() {
   } else {
     Serial.println("Hareket yok...");
   }
-  delay(550);  // Yarım saniyede bir kontrol et
+  delay(350);  // 0.35 saniyede bir kontrol et. Tavsiye değer: 550
 }

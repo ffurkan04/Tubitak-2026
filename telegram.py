@@ -13,7 +13,7 @@ baudrate = 9600
 
 # Sistem ayarları 
 message_time = 80    # İki bildirim arası bekleme süresi
-min_signal = 4      # Analiz penceresi süresi içinde en az 4 sinyal gelmeli
+min_signal = 4      # Analiz penceresi süresi içinde en az 4 sinyal gelmeli (Tavsiye değer:3)
 window_time = 3     # Analiz penceresi
 
 # Mesaj Değişkenleri 
